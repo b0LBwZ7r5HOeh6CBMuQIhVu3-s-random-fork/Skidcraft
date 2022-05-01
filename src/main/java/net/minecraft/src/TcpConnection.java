@@ -319,9 +319,10 @@ public class TcpConnection implements INetworkManager
 
         try
         {
-            Packet var2 = Packet.readPacket(this.field_98215_i, this.socketInputStream, this.theNetHandler.isServerHandler(), this.networkSocket);
-
-            if (var2 != null)
+            final PacketEvent event = new PacketEvent(Packet.readPacket(this.field_98215_i, this.socketInputStream, this.theNetHandler.isServerHandler(), this.networkSocket), PacketEvent.Type.RECEIVED);
+            Client.INSTANCE.getEventBus().post(event);
+            Packet var2 = event.getPacket();
+            if (var2 != null && !event.isCancelled())
             {
                 if (var2 instanceof Packet252SharedKey && !this.isInputBeingDecrypted)
                 {
