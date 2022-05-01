@@ -1,0 +1,64 @@
+import org.jetbrains.gradle.ext.*
+
+buildscript {
+    repositories {
+        maven {
+            url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/'
+        }
+        mavenLocal()
+    }
+}
+
+plugins {
+    id "idea"
+    id "java"
+    id "org.jetbrains.gradle.plugin.idea-ext" version "1.1.4"
+}
+
+repositories {
+    mavenLocal()
+    maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
+    maven { url 'https://jitpack.io' }
+}
+
+compileJava.options.encoding = "UTF-8"
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
+
+version = "PreAlphaTest"
+group = "wtf.kiddo"
+
+configurations {
+    extraLibs
+}
+
+dependencies {
+    extraLibs fileTree(include: ['*.jar'], dir: 'resources/libs')
+    configurations.implementation.extendsFrom(configurations.extraLibs)
+}
+
+jar {
+    from {
+        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+idea {
+    project {
+        settings {
+            runConfigurations {
+                "MinecraftClient"(Application) {
+                    moduleName = 'MinecraftClient'
+                    moduleName = project.name + '.main'
+                    mainClass = 'Start'
+                    workingDirectory = "${project.projectDir}${File.separator}run"
+                    jvmArgs = "-Djava.library.path=\"${project.projectDir}${File.separator}resources${File.separator}natives\""
+                }
+            }
+        }
+    }
+    module {
+        inheritOutputDirs = true
+    }
+}
+
+project.mkdir "${project.projectDir}/run"
