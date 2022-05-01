@@ -16,6 +16,8 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.util.glu.GLU;
+import wtf.kiddo.skidcraft.Client;
+import wtf.kiddo.skidcraft.event.Render3DEvent;
 
 public class EntityRenderer
 {
@@ -1691,7 +1693,7 @@ public class EntityRenderer
             }
 
             this.mc.mcProfiler.endStartSection("hand");
-
+            Client.INSTANCE.getEventBus().post(new Render3DEvent(par1));
             if (this.cameraZoom == 1.0D)
             {
                 GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);

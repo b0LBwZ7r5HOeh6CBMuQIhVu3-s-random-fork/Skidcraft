@@ -8,6 +8,8 @@ import java.util.Random;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
+import wtf.kiddo.skidcraft.Client;
+import wtf.kiddo.skidcraft.event.Render2DEvent;
 
 public class GuiIngame extends Gui
 {
@@ -613,6 +615,7 @@ public class GuiIngame extends Gui
             }
         }
 
+        Client.INSTANCE.getEventBus().post(new Render2DEvent(var5,par1));
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         GL11.glDisable(GL11.GL_LIGHTING);
         GL11.glEnable(GL11.GL_ALPHA_TEST);

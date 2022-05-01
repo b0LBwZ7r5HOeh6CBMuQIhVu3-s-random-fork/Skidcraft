@@ -1,5 +1,8 @@
 package net.minecraft.src;
 
+import wtf.kiddo.skidcraft.Client;
+import wtf.kiddo.skidcraft.event.PacketEvent;
+
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -166,7 +169,9 @@ public class TcpConnection implements INetworkManager
             synchronized (this.sendQueueLock)
             {
                 this.sendQueueByteLength += par1Packet.getPacketSize() + 1;
-                this.dataPackets.add(par1Packet);
+                final PacketEvent event = new PacketEvent(par1Packet, PacketEvent.Type.SENT);
+                Client.INSTANCE.getEventBus().post(event);
+                this.dataPackets.add(event.getPacket());
             }
         }
     }

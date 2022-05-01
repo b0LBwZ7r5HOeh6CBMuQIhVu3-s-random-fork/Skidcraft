@@ -127,6 +127,8 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.util.glu.GLU;
+import wtf.kiddo.skidcraft.Client;
+import wtf.kiddo.skidcraft.event.KeyInputEvent;
 
 public abstract class Minecraft implements Runnable, IPlayerUsage
 {
@@ -451,7 +453,8 @@ public abstract class Minecraft implements Runnable, IPlayerUsage
 
         this.checkGLError("Post startup");
         this.ingameGUI = new GuiIngame(this);
-
+        Client.INSTANCE.startClient();
+        System.out.println("Skidcraft Initialized");
         if (this.serverName != null)
         {
             this.displayGuiScreen(new GuiConnecting(new GuiMainMenu(), this, this.serverName, this.serverPort));
@@ -1587,6 +1590,7 @@ public abstract class Minecraft implements Runnable, IPlayerUsage
 
                 if (Keyboard.getEventKeyState())
                 {
+                    Client.INSTANCE.getEventBus().post(new KeyInputEvent(Keyboard.getEventKey()));
                     KeyBinding.onTick(Keyboard.getEventKey());
                 }
 

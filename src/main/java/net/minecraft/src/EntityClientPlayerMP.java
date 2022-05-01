@@ -1,6 +1,9 @@
 package net.minecraft.src;
 
 import net.minecraft.client.Minecraft;
+import wtf.kiddo.skidcraft.Client;
+import wtf.kiddo.skidcraft.event.MotionEvent;
+import wtf.kiddo.skidcraft.event.UpdateEvent;
 
 public class EntityClientPlayerMP extends EntityPlayerSP
 {
@@ -61,6 +64,12 @@ public class EntityClientPlayerMP extends EntityPlayerSP
      */
     public void sendMotionUpdates()
     {
+        final UpdateEvent event = new UpdateEvent(this.rotationYaw, this.rotationPitch, this.boundingBox.minY, this.onGround, true);
+        Client.INSTANCE.getEventBus().post(event);
+        if (event.isCancelled()) {
+            Client.INSTANCE.getEventBus().post(new UpdateEvent(this.rotationYaw, this.rotationPitch, this.boundingBox.minY, this.onGround));
+            return;
+        }
         boolean var1 = this.isSprinting();
 
         if (var1 != this.wasSneaking)
@@ -94,33 +103,33 @@ public class EntityClientPlayerMP extends EntityPlayerSP
         }
 
         double var3 = this.posX - this.oldPosX;
-        double var5 = this.boundingBox.minY - this.oldMinY;
+        double var5 = event.getY() - this.oldMinY;
         double var7 = this.posZ - this.oldPosZ;
-        double var9 = (double)(this.rotationYaw - this.oldRotationYaw);
-        double var11 = (double)(this.rotationPitch - this.oldRotationPitch);
+        double var9 = (double)(event.getYaw() - this.oldRotationYaw);
+        double var11 = (double)(event.getPitch() - this.oldRotationPitch);
         boolean var13 = var3 * var3 + var5 * var5 + var7 * var7 > 9.0E-4D || this.field_71168_co >= 20;
         boolean var14 = var9 != 0.0D || var11 != 0.0D;
 
         if (this.ridingEntity != null)
         {
-            this.sendQueue.addToSendQueue(new Packet13PlayerLookMove(this.motionX, -999.0D, -999.0D, this.motionZ, this.rotationYaw, this.rotationPitch, this.onGround));
+            this.sendQueue.addToSendQueue(new Packet13PlayerLookMove(this.motionX, -999.0D, -999.0D, this.motionZ, event.getYaw(), event.getPitch(), event.isOnGround()));
             var13 = false;
         }
         else if (var13 && var14)
         {
-            this.sendQueue.addToSendQueue(new Packet13PlayerLookMove(this.posX, this.boundingBox.minY, this.posY, this.posZ, this.rotationYaw, this.rotationPitch, this.onGround));
+            this.sendQueue.addToSendQueue(new Packet13PlayerLookMove(this.posX, event.getY(), this.posY, this.posZ, event.getYaw(), event.getPitch(), event.isOnGround()));
         }
         else if (var13)
         {
-            this.sendQueue.addToSendQueue(new Packet11PlayerPosition(this.posX, this.boundingBox.minY, this.posY, this.posZ, this.onGround));
+            this.sendQueue.addToSendQueue(new Packet11PlayerPosition(this.posX, event.getY(), this.posY, this.posZ, event.isOnGround()));
         }
         else if (var14)
         {
-            this.sendQueue.addToSendQueue(new Packet12PlayerLook(this.rotationYaw, this.rotationPitch, this.onGround));
+            this.sendQueue.addToSendQueue(new Packet12PlayerLook(event.getYaw(), event.getPitch(), event.isOnGround()));
         }
         else
         {
-            this.sendQueue.addToSendQueue(new Packet10Flying(this.onGround));
+            this.sendQueue.addToSendQueue(new Packet10Flying(event.isOnGround()));
         }
 
         ++this.field_71168_co;
@@ -129,7 +138,7 @@ public class EntityClientPlayerMP extends EntityPlayerSP
         if (var13)
         {
             this.oldPosX = this.posX;
-            this.oldMinY = this.boundingBox.minY;
+            this.oldMinY = event.getY();
             this.oldPosY = this.posY;
             this.oldPosZ = this.posZ;
             this.field_71168_co = 0;
@@ -137,9 +146,16 @@ public class EntityClientPlayerMP extends EntityPlayerSP
 
         if (var14)
         {
-            this.oldRotationYaw = this.rotationYaw;
-            this.oldRotationPitch = this.rotationPitch;
+            this.oldRotationYaw = event.getYaw();
+            this.oldRotationPitch = event.getPitch();
         }
+        Client.INSTANCE.getEventBus().post(new UpdateEvent(this.rotationYaw, this.rotationPitch, this.boundingBox.minY, this.onGround));
+    }
+
+    @Override
+    public void moveEntity(double par1, double par3, double par5) {
+        final MotionEvent event = new MotionEvent(par1,par3,par5);
+        super.moveEntity(event.getX(), event.getY(), event.getZ());
     }
 
     /**
